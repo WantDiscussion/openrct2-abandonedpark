@@ -48,7 +48,7 @@ var decadeAgeTiles = function () {
             for (var i = 0; i < tile.numElements; i++) {
                 var element = tile.getElement(i);
                 if (element.type == 'surface') {
-                    if (element.ownership == 32) {
+                    if (element.ownership & 32) {
                         if (element.surfaceStyle == 0) {
 
                             if (prob(100 * ageGrassProbScale)) {
@@ -96,7 +96,7 @@ var decadeAgeTiles = function () {
                             }
                         }
 
-                    } else if (element.ownership == 16) {}
+                    } else if (element.ownership & 16) {}
                     else {
                         tileOwned = false;
                     }
