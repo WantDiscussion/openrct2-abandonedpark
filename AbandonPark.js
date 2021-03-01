@@ -7,15 +7,20 @@ var sBWaFIndex = []; //smallBreakableWallsandFloorsIndex
 var lBWaFIndex = []; //largeBreakableWallsandFloorsIndex
 
 //Probability Scale
-var globalProbScale = 1;
-var ageGrassProbScale = 1;
-var growShrubProbScale = 1;
-var breakTrackProbScale = 1;
-var killGrassProbScale = 1;
-var killTreeProbScale = 1;
-var trashPathProbScale = 1;
-var destroyStructProbScale = 1;
-var fadePaintProbScale = 1;
+var globalProbScale = 1; // Global degredation probability scale
+var ageGrassProbScale = 1; // scale chances a grass tile will grow
+var growShrubProbScale = 1; // scale chances a shrubs/bush will grow on a grass/grass clumps tile
+var breakTrackProbScale = 1; // scale chances a track will be removed
+var killGrassProbScale = 1; // scale chances a grass tile will become a grass clumps tile
+var killTreeProbScale = 1; // scale chances certain trees will become dead trees
+var trashPathProbScale = 1; // scale chances a path addition will be vandalized
+var destroyStructProbScale = 1; // scale chances walls, paths and certain scenery items will be removed
+var destroyPathsProbScale = 1; // scale chances a path element will be removed
+var destroySmallSceneryProbScale = 1; // scale chances a small scenery element will be removed.
+var destroyWallsProbScale = 1; // scale chances a wall element will be removed.
+var destroyLargeSceneryProbScale = 1; // scale chances a large scenery element will be removed.
+var fadePaintProbScale = 1; // currently unused
+
 
 var maxDPT = 3;
 var iterations = 1;
@@ -210,8 +215,8 @@ var decadeAgeTiles = function () {
                     tallestElement = tile.getElement(tallestScenery);
                     if (surfaceIndex != -1) {
                         if (tallestElement.baseZ >= tile.getElement(surfaceIndex).baseZ) {
-                            if (prob(25 * destroyStructProbScale)) {
-                                if (tallestElement.type == 'small_scenery') {
+                            if (prob(75 * destroyStructProbScale)) {
+                                if (tallestElement.type == 'small_scenery' && prob(50 * destroySmallSceneryProbScale)) {
                                     var ssrArgs = {
                                         x: tile.x * 32,
                                         y: tile.y * 32,
@@ -224,19 +229,21 @@ var decadeAgeTiles = function () {
                                         if (queryResult.error == 0)
                                             context.executeAction("smallsceneryremove", ssrArgs, function () {});
                                     });
-                                } else if (tallestElement.type == 'large_scenery') {
-                                    var lsrArgs = {
-                                        x: tile.x * 32,
-                                        y: tile.y * 32,
-                                        z: tallestElement.baseZ,
-                                        direction: tallestElement.direction,
-                                        tileIndex: tallestElement.sequence
-                                    };
-                                    context.queryAction("largesceneryremove", lsrArgs, function (queryResult) {
-                                        if (queryResult.error == 0)
-                                            context.executeAction("largesceneryremove", lsrArgs, function () {});
-                                    });
-                                } else if (tallestElement.type == 'wall') {
+                                } else if (tallestElement.type == 'large_scenery' && prob(25 * destroyLargeSceneryProbScale)) {
+                                    if (tallestElement.sequence == 0) {
+                                        var lsrArgs = {
+                                            x: tile.x * 32,
+                                            y: tile.y * 32,
+                                            z: tallestElement.baseZ,
+                                            direction: tallestElement.direction,
+                                            tileIndex: tallestElement.sequence
+                                        };
+                                        context.queryAction("largesceneryremove", lsrArgs, function (queryResult) {
+                                            if (queryResult.error == 0)
+                                                context.executeAction("largesceneryremove", lsrArgs, function () {});
+                                        });
+                                    }
+                                } else if (tallestElement.type == 'wall' && prob(25 * destroyWallsProbScale)) {
                                     var wrArgs = {
                                         x: tile.x * 32,
                                         y: tile.y * 32,
@@ -247,7 +254,7 @@ var decadeAgeTiles = function () {
                                         if (queryResult.error == 0)
                                             context.executeAction("wallremove", wrArgs, function () {});
                                     });
-                                } else if (tallestElement.type == 'footpath') {
+                                } else if (tallestElement.type == 'footpath' && prob(10 * destroyPathsProbScale)) {
                                     var fprArgs = {
                                         x: tile.x * 32,
                                         y: tile.y * 32,
@@ -259,9 +266,9 @@ var decadeAgeTiles = function () {
                                     });
                                 }
 
-                            } else {
+                            } /* else {
                                 break;
-                            }
+                            } */
                         } else {
                             break;
                         }
