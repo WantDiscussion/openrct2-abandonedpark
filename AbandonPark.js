@@ -42,6 +42,7 @@ var decadeAgeTiles = function () {
     for (var y = 0; y < map.size.y; y++) {
         for (var x = 0; x < map.size.x; x++) {
             var tile = map.getTile(x, y);
+			//console.log(x+ ","+ y);
             // Iterate every element on the tile
             var tileOwned = true;
             for (var i = 0; i < tile.numElements; i++) {
@@ -210,7 +211,7 @@ var decadeAgeTiles = function () {
                                         y: tile.y * 32,
                                         z: tallestElement.baseZ,
                                         direction: tallestElement.direction,
-                                        tileIndex: tallestElement
+                                        tileIndex: tallestElement.sequence
                                     };
                                     context.queryAction("largesceneryremove", lsrArgs, function (queryResult) {
                                         if (queryResult.error == 0)
