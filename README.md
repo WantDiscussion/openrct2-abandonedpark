@@ -5,9 +5,10 @@
 
 This could be the plugin for you!
 
-## Installation
-- download the AbandonPark.js file.
-- Put it in the plugin folder for your openrct2 installation
+## Installation and Usage
+- Download the AbandonPark.js file.
+- Move the file into the plugin folder for your openrct2 installation
+- Select AbandonPark from the map drop down menu
 
 ## Recommended for best results
 - Ensure cheat menu is enabled in options.
