@@ -25,7 +25,7 @@ This could be the plugin for you!
     - Low Bush
 
 ## Customization
-- Open the -js file in a text editor.
+- Open AbandonPark.js file in a text editor.
   - Change the values listed under //Probability Scale in order to increase/decrease the effects of the plugin.
   - Change the iteration value to determine how many destructive loops you wish the plugin to run through.
   - Change the maxDPT value to alter how many paths and wall/roof scenery elements can be destroyed per tile per iteration.
