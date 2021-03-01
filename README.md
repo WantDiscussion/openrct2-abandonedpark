@@ -1,7 +1,7 @@
 # Abandoned Park - a plugin for OpenRCT2
 - Do you like abandoned theme parks?
-- Did you enjoy the challenge of Rotting Heights?
-- Are you looking for more maps of the same style?
+- Did you enjoy the map Rotting Heights?
+- Are you looking for a challenging fixer upper?
 
 This could be the plugin for you!
 
@@ -37,3 +37,7 @@ This could be the plugin for you!
 - Things that may be added once the API supports them.
   - Automatically add unavailable objects.
   - Add litter and trash.
+  - 
+![Diamond Heights 2021-03-02 01-19-40](https://user-images.githubusercontent.com/62322762/109519206-228f5500-7aff-11eb-8fac-c368f6e4f02f.png)
+![Alton Towers 2021-03-02 01-44-41](https://user-images.githubusercontent.com/62322762/109519210-2327eb80-7aff-11eb-97f7-5a22ecd1572c.png)
+![Six Flags Magic Mountain 2021-03-02 01-41-45](https://user-images.githubusercontent.com/62322762/109519193-20c59180-7aff-11eb-957d-ecbe3cd83aff.png)
