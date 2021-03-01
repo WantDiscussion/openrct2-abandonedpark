@@ -13,10 +13,10 @@ This could be the plugin for you!
 ## Recommended for best results
 - Ensure cheat menu is enabled in options.
   - Open the Object Selection window from the cheat menu (Hold the cheat menu button for the drop down)
-  - Have the following Objects (using advanced mode) or Scenery Groups selected:
+  - Have the following Scenery Groups or Individual Objects (Using advanced mode) selected:
   - Shrubs and Ornaments
     - Shrubs x 2
-	- Bush ('rct2.tsh3', 'rct2.tsh5', 'rct2.tsh0')
+    - Bush ('rct2.tsh3', 'rct2.tsh5', 'rct2.tsh0')
   - Jungle Themeing
     - Bush x 4
   - Spooky Themeing
