@@ -34,7 +34,7 @@ This could be the plugin for you!
 - Things that could be done now.
   - Add gui for easier customization.
   - Fade the paint on rides and scenery. (?)
-- Things that may be added once the API supports them.
+- Things that may be added once the plugin API supports them.
   - Automatically add unavailable objects.
   - Add trash.
 
