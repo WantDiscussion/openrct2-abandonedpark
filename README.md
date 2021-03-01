@@ -36,8 +36,8 @@ This could be the plugin for you!
   - Fade the paint on rides and scenery. (?)
 - Things that may be added once the API supports them.
   - Automatically add unavailable objects.
-  - Add litter and trash.
-  - 
+  - Add trash.
+
 ![Diamond Heights 2021-03-02 01-19-40](https://user-images.githubusercontent.com/62322762/109519206-228f5500-7aff-11eb-8fac-c368f6e4f02f.png)
 ![Alton Towers 2021-03-02 01-44-41](https://user-images.githubusercontent.com/62322762/109519210-2327eb80-7aff-11eb-97f7-5a22ecd1572c.png)
 ![Six Flags Magic Mountain 2021-03-02 01-41-45](https://user-images.githubusercontent.com/62322762/109519193-20c59180-7aff-11eb-957d-ecbe3cd83aff.png)
