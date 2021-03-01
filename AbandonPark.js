@@ -42,14 +42,15 @@ var decadeAgeTiles = function () {
     for (var y = 0; y < map.size.y; y++) {
         for (var x = 0; x < map.size.x; x++) {
             var tile = map.getTile(x, y);
-			//console.log(x+ ","+ y);
+            //console.log(x+ ","+ y);
             // Iterate every element on the tile
             var tileOwned = true;
             for (var i = 0; i < tile.numElements; i++) {
                 var element = tile.getElement(i);
                 if (element.type == 'surface') {
-                    if (element.surfaceStyle == 0) {
-                        if (element.ownership == 32) {
+                    if (element.ownership == 32) {
+                        if (element.surfaceStyle == 0) {
+
                             if (prob(100 * ageGrassProbScale)) {
                                 if (element.grassLength < 6) {
                                     element.grassLength = context.getRandom(element.grassLength + 1, 7);
@@ -76,10 +77,28 @@ var decadeAgeTiles = function () {
                             if (prob(50 * killGrassProbScale)) {
                                 element.surfaceStyle = 6;
                             }
-                        } else if (element.ownership == 16) {}
-                        else {
-                            tileOwned = false;
+                        } else if (element.surfaceStyle == 6) {
+                            if (prob(30 * growShrubProbScale)) {
+                                var sceneryAddArgs = {
+                                    x: tile.x * 32,
+                                    y: tile.y * 32,
+                                    z: element.baseZ,
+                                    direction: context.getRandom(0, 4),
+                                    quadrant: context.getRandom(0, 4),
+                                    object: bushesAndShrubsIndex[context.getRandom(0, bushesAndShrubsIndex.length)],
+                                    primaryColour: 0,
+                                    secondaryColour: 0
+                                };
+                                context.queryAction("smallsceneryplace", sceneryAddArgs, function (queryResult) {
+                                    if (queryResult.error == 0)
+                                        context.executeAction("smallsceneryplace", sceneryAddArgs, function () {});
+                                });
+                            }
                         }
+
+                    } else if (element.ownership == 16) {}
+                    else {
+                        tileOwned = false;
                     }
                     break; //surface found go to next element type
                 }
