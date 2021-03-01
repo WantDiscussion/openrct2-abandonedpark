@@ -397,7 +397,7 @@ var main = function () {
 registerPlugin({
     name: 'Abandon Park',
     version: '1.0',
-    authors: ['OpenRCT2'],
+    authors: ['WantDiscussion'],
     type: 'remote',
     licence: 'GPL-3.0',
     main: main
