@@ -21,9 +21,9 @@ var destroyWallsProbScale = 1; // scale chances a wall element will be removed.
 var destroyLargeSceneryProbScale = 1; // scale chances a large scenery element will be removed.
 var fadePaintProbScale = 1; // currently unused
 
-
+var landOwnedOnly = true;
 var maxDPT = 3;
-var iterations = 1;
+var iterations = 2;
 
 const bushAndShrubIdents = ['rct2.ww.1x1atree', 'rct2.tjb4', 'rct2.tjb2', 'rct2.tjb3', 'rct2.tbr', 'rct2.tjb1', 'rct2.tsh4', 'rct2.tsh3', 'rct2.tsh5', 'rct2.tsh0', 'rct2.tsh1'];
 const deadTrees89Idents = ['rct2.tdt2', 'rct2.tdt1'];
@@ -50,9 +50,14 @@ var decadeAgeTiles = function () {
             //console.log(x+ ","+ y);
             // Iterate every element on the tile
             var tileOwned = true;
+            var initialOwnership = 0;
             for (var i = 0; i < tile.numElements; i++) {
                 var element = tile.getElement(i);
                 if (element.type == 'surface') {
+                    if (!landOwnedOnly) {
+                        initialOwnership = element.ownership;
+                        element.ownership = 32;
+                    }
                     if (element.ownership & 32) {
                         if (element.surfaceStyle == 0) {
 
@@ -215,7 +220,7 @@ var decadeAgeTiles = function () {
                     tallestElement = tile.getElement(tallestScenery);
                     if (surfaceIndex != -1) {
                         if (tallestElement.baseZ >= tile.getElement(surfaceIndex).baseZ) {
-                            if (prob(75 * destroyStructProbScale)) {
+                            if (prob(50 * destroyStructProbScale)) {
                                 if (tallestElement.type == 'small_scenery' && prob(50 * destroySmallSceneryProbScale)) {
                                     var ssrArgs = {
                                         x: tile.x * 32,
@@ -254,7 +259,7 @@ var decadeAgeTiles = function () {
                                         if (queryResult.error == 0)
                                             context.executeAction("wallremove", wrArgs, function () {});
                                     });
-                                } else if (tallestElement.type == 'footpath' && prob(10 * destroyPathsProbScale)) {
+                                } else if (tallestElement.type == 'footpath' && prob(10 * destroyPathsProbScale) && ((initialOwnership & 16) | (initialOwnership & 32))) {
                                     var fprArgs = {
                                         x: tile.x * 32,
                                         y: tile.y * 32,
@@ -263,149 +268,159 @@ var decadeAgeTiles = function () {
                                     context.queryAction("footpathremove", fprArgs, function (queryResult) {
                                         if (queryResult.error == 0)
                                             context.executeAction("footpathremove", fprArgs, function () {});
-                                    });
-                                }
+                                        });
+                                    }
 
-                            } /* else {
+                                }
+                                /* else {
                                 break;
-                            } */
-                        } else {
-                            break;
+                                } */
+                            } else {
+                                break;
+                            }
+                        }
+                    } else {
+                        break;
+                    }
+                }
+
+                if (!landOwnedOnly) {
+                    for (var i = 0; i < tile.numElements; i++) {
+                        var element = tile.getElement(i);
+                        if (element.type == 'surface') {
+                            element.ownership = initialOwnership;
                         }
                     }
-                } else {
-                    break;
                 }
             }
-        }
 
-    }
-}
-
-var hardCloseAllRides = function () {
-    var ride = 0;
-    var ridesFound = 0;
-    var currentRide;
-    while (ridesFound < map.numRides) {
-        if (currentRide = map.getRide(ride)) {
-            //console.log(currentRide.name);
-            currentRide.lifecycleFlags &= ~(1 << 7);
-            var rideargs = {
-                ride: currentRide.id,
-                status: 0
-            };
-            context.executeAction("ridesetstatus", rideargs, function () {});
-            context.executeAction("ridesetstatus", rideargs, function () {});
-
-            ridesFound++;
-        }
-        ride++;
-    }
-}
-
-var ageAllRides = function () {
-    var ride = 0;
-    var ridesFound = 0;
-    var currentRide;
-    while (ridesFound < map.numRides) {
-        if (currentRide = map.getRide(ride)) {
-            currentRide.buildDate -= 120;
-            ridesFound++;
-        }
-        ride++;
-    }
-}
-
-var removeAllPeeps = function () {
-    var peeps = map.getAllEntities("peep");
-    if (peeps.length > 0) {
-        for (var i = 0; i < peeps.length; i++)
-            peeps[i].remove();
-        //map.getAllEntities("peep")[0].remove();
-    }
-}
-
-var getSceneryIndex = function () {
-    var smallsceneryobjects = context.getAllObjects('small_scenery');
-    var largesceneryobjects = context.getAllObjects('large_scenery');
-
-    bushesAndShrubsIndex = [];
-    kT89Index = [];
-    kT67Index = [];
-    sBWaFIndex = [];
-    lBWaFIndex = [];
-    deadTrees89Index = [];
-    deadTrees67Index = [];
-
-    for (var i = 0; i < smallsceneryobjects.length; i++) {
-        //console.log(smallsceneryobjects[i].name);
-        if (bushAndShrubIdents.indexOf(smallsceneryobjects[i].identifier) >= 0) {
-            bushesAndShrubsIndex.push(smallsceneryobjects[i].index);
-        } else if (killableTreesC8C9Iden.indexOf(smallsceneryobjects[i].identifier) >= 0) {
-            kT89Index.push(smallsceneryobjects[i].index);
-        } else if (killableTreesC6C7Iden.indexOf(smallsceneryobjects[i].identifier) >= 0) {
-            kT67Index.push(smallsceneryobjects[i].index);
-        } else if (breakableSmallWallsIden.indexOf(smallsceneryobjects[i].identifier) >= 0) {
-            sBWaFIndex.push(smallsceneryobjects[i].index);
-        } else if (breakableSmallRoofsIden.indexOf(smallsceneryobjects[i].identifier) >= 0) {
-            sBWaFIndex.push(smallsceneryobjects[i].index);
-        } else if (deadTrees89Idents.indexOf(smallsceneryobjects[i].identifier) >= 0) {
-            deadTrees89Index.push(smallsceneryobjects[i].index);
-        } else if (deadTrees67Idents.indexOf(smallsceneryobjects[i].identifier) >= 0) {
-            deadTrees67Index.push(smallsceneryobjects[i].index);
-        }
-
-    }
-
-    for (var i = 0; i < largesceneryobjects.length; i++) {
-        if (breakableLargeWallsIden.indexOf(largesceneryobjects[i].identifier) >= 0) {
-            lBWaFIndex.push(largesceneryobjects[i].index);
-        }
-        if (breakableLargeRoofsIden.indexOf(largesceneryobjects[i].identifier) >= 0) {
-            lBWaFIndex.push(largesceneryobjects[i].index);
         }
     }
-    //console.log(bushesAndShrubsIndex[0]);
-}
 
-//Currently not working
-var fadePaint = function () {
-    var ride = 0;
-    var ridesFound = 0;
-    var currentRide;
-    while (ridesFound < map.numRides) {
-        if (currentRide = map.getRide(ride)) {
-            currentRide.colourSchemes[0].main = 1;
-            currentRide.colourSchemes[0].additional = 24;
-            currentRide.colourSchemes[0].supports = 22;
-            ridesFound++;
+    var hardCloseAllRides = function () {
+        var ride = 0;
+        var ridesFound = 0;
+        var currentRide;
+        while (ridesFound < map.numRides) {
+            if (currentRide = map.getRide(ride)) {
+                //console.log(currentRide.name);
+                currentRide.lifecycleFlags &= ~(1 << 7);
+                var rideargs = {
+                    ride: currentRide.id,
+                    status: 0
+                };
+                context.executeAction("ridesetstatus", rideargs, function () {});
+                context.executeAction("ridesetstatus", rideargs, function () {});
+
+                ridesFound++;
+            }
+            ride++;
         }
-        ride++;
     }
-}
 
-var main = function () {
-    // Add a menu item under the map icon on the top toolbar
-    ui.registerMenuItem("Abandon Park", function () {
-        var defaultMoneyMode = park.getFlag("noMoney");
-        park.setFlag("noMoney", true);
-        hardCloseAllRides();
-        fadePaint();
-        removeAllPeeps();
-        getSceneryIndex();
-        for (var iter = 0; iter < iterations; iter++) {
-            ageAllRides();
-            decadeAgeTiles();
+    var ageAllRides = function () {
+        var ride = 0;
+        var ridesFound = 0;
+        var currentRide;
+        while (ridesFound < map.numRides) {
+            if (currentRide = map.getRide(ride)) {
+                currentRide.buildDate -= 120;
+                ridesFound++;
+            }
+            ride++;
         }
-        park.setFlag("noMoney", defaultMoneyMode);
+    }
+
+    var removeAllPeeps = function () {
+        var peeps = map.getAllEntities("peep");
+        if (peeps.length > 0) {
+            for (var i = 0; i < peeps.length; i++)
+                peeps[i].remove();
+            //map.getAllEntities("peep")[0].remove();
+        }
+    }
+
+    var getSceneryIndex = function () {
+        var smallsceneryobjects = context.getAllObjects('small_scenery');
+        var largesceneryobjects = context.getAllObjects('large_scenery');
+
+        bushesAndShrubsIndex = [];
+        kT89Index = [];
+        kT67Index = [];
+        sBWaFIndex = [];
+        lBWaFIndex = [];
+        deadTrees89Index = [];
+        deadTrees67Index = [];
+
+        for (var i = 0; i < smallsceneryobjects.length; i++) {
+            //console.log(smallsceneryobjects[i].name);
+            if (bushAndShrubIdents.indexOf(smallsceneryobjects[i].identifier) >= 0) {
+                bushesAndShrubsIndex.push(smallsceneryobjects[i].index);
+            } else if (killableTreesC8C9Iden.indexOf(smallsceneryobjects[i].identifier) >= 0) {
+                kT89Index.push(smallsceneryobjects[i].index);
+            } else if (killableTreesC6C7Iden.indexOf(smallsceneryobjects[i].identifier) >= 0) {
+                kT67Index.push(smallsceneryobjects[i].index);
+            } else if (breakableSmallWallsIden.indexOf(smallsceneryobjects[i].identifier) >= 0) {
+                sBWaFIndex.push(smallsceneryobjects[i].index);
+            } else if (breakableSmallRoofsIden.indexOf(smallsceneryobjects[i].identifier) >= 0) {
+                sBWaFIndex.push(smallsceneryobjects[i].index);
+            } else if (deadTrees89Idents.indexOf(smallsceneryobjects[i].identifier) >= 0) {
+                deadTrees89Index.push(smallsceneryobjects[i].index);
+            } else if (deadTrees67Idents.indexOf(smallsceneryobjects[i].identifier) >= 0) {
+                deadTrees67Index.push(smallsceneryobjects[i].index);
+            }
+
+        }
+
+        for (var i = 0; i < largesceneryobjects.length; i++) {
+            if (breakableLargeWallsIden.indexOf(largesceneryobjects[i].identifier) >= 0) {
+                lBWaFIndex.push(largesceneryobjects[i].index);
+            }
+            if (breakableLargeRoofsIden.indexOf(largesceneryobjects[i].identifier) >= 0) {
+                lBWaFIndex.push(largesceneryobjects[i].index);
+            }
+        }
+        //console.log(bushesAndShrubsIndex[0]);
+    }
+
+    //Currently not working
+    var fadePaint = function () {
+        var ride = 0;
+        var ridesFound = 0;
+        var currentRide;
+        while (ridesFound < map.numRides) {
+            if (currentRide = map.getRide(ride)) {
+                currentRide.colourSchemes[0].main = 1;
+                currentRide.colourSchemes[0].additional = 24;
+                currentRide.colourSchemes[0].supports = 22;
+                ridesFound++;
+            }
+            ride++;
+        }
+    }
+
+    var main = function () {
+        // Add a menu item under the map icon on the top toolbar
+        ui.registerMenuItem("Abandon Park", function () {
+            var defaultMoneyMode = park.getFlag("noMoney");
+            park.setFlag("noMoney", true);
+            hardCloseAllRides();
+            fadePaint();
+            removeAllPeeps();
+            getSceneryIndex();
+            for (var iter = 0; iter < iterations; iter++) {
+                ageAllRides();
+                decadeAgeTiles();
+            }
+            park.setFlag("noMoney", defaultMoneyMode);
+        });
+    };
+
+    registerPlugin({
+        name: 'Abandon Park',
+        version: '1.0',
+        authors: ['WantDiscussion'],
+        type: 'remote',
+        licence: 'GPL-3.0',
+        main: main
     });
-};
-
-registerPlugin({
-    name: 'Abandon Park',
-    version: '1.0',
-    authors: ['WantDiscussion'],
-    type: 'remote',
-    licence: 'GPL-3.0',
-    main: main
-});
