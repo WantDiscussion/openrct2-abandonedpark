@@ -29,7 +29,8 @@ This could be the plugin for you!
   - Change the values listed under //Probability Scale in order to increase/decrease the effects of the plugin.
   - Change the iteration value to determine how many destructive loops you wish the plugin to run through.
   - Change the maxDPT value to alter how many paths and wall/roof scenery elements can be destroyed per tile per iteration.
-  
+  - Change landOwnedOnly to false if you want the plugin to effect surrounding land. Will leaves paths alone (experimental)
+
 ## Possible Future Improvements
 - Things that could be done now.
   - Add gui for easier customization.
