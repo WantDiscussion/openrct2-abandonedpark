@@ -9,6 +9,7 @@ This could be the plugin for you!
 - Download the AbandonPark.js file.
 - Move the file into the plugin folder for your openrct2 installation
 - Select AbandonPark from the map drop down menu
+- Press Abandon Park button down the bottom!
 
 ## Recommended for best results
 - Ensure cheat menu is enabled in options.
@@ -25,15 +26,17 @@ This could be the plugin for you!
     - Low Bush
 
 ## Customization
-- Open AbandonPark.js file in a text editor.
-  - Change the values listed under //Probability Scale in order to increase/decrease the effects of the plugin.
-  - Change the iteration value to determine how many destructive loops you wish the plugin to run through.
-  - Change the maxDPT value to alter how many paths and wall/roof scenery elements can be destroyed per tile per iteration.
-  - Change landOwnedOnly to false if you want the plugin to effect surrounding land. Will leaves paths alone (experimental)
+- Global scale will multiply all probabilities.
+- The probability values in the gui probability of each event happening per iteration
+- The destroyStructure probability that the the highest scenery/path is checked for removal run a maximum of times equal to the max scenery/path removal per tile (stopping if the probability fails)
+  -destroyStructure checks the highest scenery/path item of a roof or wall type and may it based on the probability of that particular item type
+- Iterations is the number of times to run the plugin
 
 ## Possible Future Improvements
 - Things that could be done now.
-  - Add gui for easier customization.
+  - Make ugly GUI neater.
+  - Remove floating scenery
+  - Remove tracks in larger groups
   - Fade the paint on rides and scenery. (?)
 - Things that may be added once the plugin API supports them.
   - Automatically add unavailable objects.

@@ -1,3 +1,25 @@
+const namespace = 'abandon_park';
+const globalScaleKey = namespace + ".globalScale";
+const ageGrassProbKey = namespace + ".ageGrassProb";
+const growShrubProbKey = namespace + ".growShrubProb";
+const breakTrackProbKey = namespace + ".breakTrackProb";
+const killGrassProbKey = namespace + ".killGrassProb";
+const killTreeProbKey = namespace + ".killTreeProb";
+const trashPathProbKey = namespace + ".trashPathProb";
+const destroyStructProbKey = namespace + ".destroyStructProb";
+const destroyPathsProbKey = namespace + ".destroyPathsProb";
+const destroySmallProbKey = namespace + ".destroySmallProb";
+const destroyWallsProbKey = namespace + ".destroyWallsProb";
+const destroyLargeProbKey = namespace + ".destroyLargeProb";
+const fadePaintProbKey = namespace + ".fadePaintProb";
+
+const landOwnedOnlyKey = namespace + ".landOwnedOnly";
+const maxDPTKey = namespace + ".maxDPT";
+const iterationsKey = namespace + ".iterations";
+const ageRidesKey = namespace + ".ageRides";
+const breakFlatsKey = namespace + ".breakFlats";
+const ageSceneryKey = namespace + ".ageScenery";
+
 var bushesAndShrubsIndex = [];
 var deadTrees89Index = [];
 var deadTrees67Index = [];
@@ -6,24 +28,7 @@ var kT67Index = [];
 var sBWaFIndex = []; //smallBreakableWallsandFloorsIndex
 var lBWaFIndex = []; //largeBreakableWallsandFloorsIndex
 
-//Probability Scale
 var globalProbScale = 1; // Global degredation probability scale
-var ageGrassProbScale = 1; // scale chances a grass tile will grow
-var growShrubProbScale = 1; // scale chances a shrubs/bush will grow on a grass/grass clumps tile
-var breakTrackProbScale = 1; // scale chances a track will be removed
-var killGrassProbScale = 1; // scale chances a grass tile will become a grass clumps tile
-var killTreeProbScale = 1; // scale chances certain trees will become dead trees
-var trashPathProbScale = 1; // scale chances a path addition will be vandalized
-var destroyStructProbScale = 1; // scale chances walls, paths and certain scenery items will be removed
-var destroyPathsProbScale = 1; // scale chances a path element will be removed
-var destroySmallSceneryProbScale = 1; // scale chances a small scenery element will be removed.
-var destroyWallsProbScale = 1; // scale chances a wall element will be removed.
-var destroyLargeSceneryProbScale = 1; // scale chances a large scenery element will be removed.
-var fadePaintProbScale = 1; // currently unused
-
-var landOwnedOnly = true;
-var maxDPT = 3;
-var iterations = 2;
 
 const bushAndShrubIdents = ['rct2.ww.1x1atree', 'rct2.tjb4', 'rct2.tjb2', 'rct2.tjb3', 'rct2.tbr', 'rct2.tjb1', 'rct2.tsh4', 'rct2.tsh3', 'rct2.tsh5', 'rct2.tsh0', 'rct2.tsh1'];
 const deadTrees89Idents = ['rct2.tdt2', 'rct2.tdt1'];
@@ -39,8 +44,16 @@ const breakableSmallRoofsIden = ['rct2.tt.artdec28', 'rct2.ww.sbwplm03', 'rct2.w
 
 const breakableLargeRoofsIden = ['rct2.ww.bamborf2', 'rct2.ww.bamborf1', 'rct2.ww.bamborf3', 'rct2.tt.psntwl27', 'rct2.tt.psntwl28', 'rct2.tt.psntwl26', 'rct2.tt.oldnyk24', 'rct2.tt.oldnyk32', 'rct2.tt.oldnyk25', 'rct2.tt.oldnyk20', 'rct2.ww.mbskyr01', 'rct2.ww.rtudor05', 'rct2.ww.rtudor06'];
 
+const getConfig = function (key, defaultValue) {
+    return context.sharedStorage.get(key, defaultValue);
+}
+
+const setConfig = function (key, value) {
+    return context.sharedStorage.set(key, value)
+}
+
 var prob = function (percent) {
-    return (context.getRandom(0, 10000) < percent * 100 * globalProbScale);
+    return (context.getRandom(0, 10000) < percent * 100 * getConfig(globalScaleKey, 1));
 }
 
 var decadeAgeTiles = function () {
@@ -55,20 +68,20 @@ var decadeAgeTiles = function () {
                 var element = tile.getElement(i);
                 if (element.type == 'surface') {
                     initialOwnership = element.ownership;
-                    if (!landOwnedOnly) {
+                    if (!getConfig(landOwnedOnlyKey, true)) {
                         element.ownership = 32;
                     }
                     if (element.ownership & 32) {
                         if (element.surfaceStyle == 0) {
 
-                            if (prob(100 * ageGrassProbScale)) {
+                            if (prob(getConfig(ageGrassProbKey, 100))) {
                                 if (element.grassLength < 6) {
                                     element.grassLength = context.getRandom(element.grassLength + 1, 7);
                                 } else {
                                     element.grassLength = 5
                                 }
                             }
-                            if (prob(30 * growShrubProbScale)) {
+                            if (prob(getConfig(growShrubProbKey, 30))) {
                                 var sceneryAddArgs = {
                                     x: tile.x * 32,
                                     y: tile.y * 32,
@@ -84,11 +97,11 @@ var decadeAgeTiles = function () {
                                         context.executeAction("smallsceneryplace", sceneryAddArgs, function () {});
                                 });
                             }
-                            if (prob(50 * killGrassProbScale)) {
+                            if (prob(getConfig(killGrassProbKey, 50))) {
                                 element.surfaceStyle = 6;
                             }
                         } else if (element.surfaceStyle == 6) {
-                            if (prob(30 * growShrubProbScale)) {
+                            if (prob(getConfig(growShrubProbKey, 30))) {
                                 var sceneryAddArgs = {
                                     x: tile.x * 32,
                                     y: tile.y * 32,
@@ -125,7 +138,7 @@ var decadeAgeTiles = function () {
                         var currentRide = map.getRide(element.ride);
                         if (currentRide.classification == 'ride') {
                             if (currentRide.object.carsPerFlatRide == 255) {
-                                if (prob(40 * breakTrackProbScale)) {
+                                if (prob(getConfig(breakTrackProbKey, 50))) {
                                     var trackremoveargs = {
                                         trackType: element.trackType,
                                         sequence: element.sequence,
@@ -152,7 +165,7 @@ var decadeAgeTiles = function () {
                 }
 
                 if (element.type == 'footpath') {
-                    if (prob(50 * trashPathProbScale)) {
+                    if (prob(getConfig(trashPathProbKey, 50))) {
                         element.isAdditionBroken = true;
                     }
                 }
@@ -162,7 +175,7 @@ var decadeAgeTiles = function () {
                     if (element.age < 128) {
                         element.age = context.getRandom(element.age + 10, 128);
                     }
-                    if (prob(30 * killTreeProbScale)) {
+                    if (prob(getConfig(killTreeProbKey, 30))) {
                         if (deadTrees89Index.length > 0 && kT89Index.length > 0) {
                             if (kT89Index.indexOf(element.object) != -1) {
                                 element.object = deadTrees89Index[context.getRandom(0, deadTrees89Index.length)];
@@ -179,7 +192,7 @@ var decadeAgeTiles = function () {
 
             }
 
-            for (var d = 0; d < maxDPT; d++) {
+            for (var d = 0; d < getConfig(maxDPTKey, 3); d++) {
                 var tallestScenery = -1;
                 var surfaceIndex = -1;
                 for (var i = 0; i < tile.numElements; i++) {
@@ -220,8 +233,8 @@ var decadeAgeTiles = function () {
                     tallestElement = tile.getElement(tallestScenery);
                     if (surfaceIndex != -1) {
                         if (tallestElement.baseZ >= tile.getElement(surfaceIndex).baseZ) {
-                            if (prob(50 * destroyStructProbScale)) {
-                                if (tallestElement.type == 'small_scenery' && prob(50 * destroySmallSceneryProbScale)) {
+                            if (prob(getConfig(destroyStructProbKey, 90))) {
+                                if (tallestElement.type == 'small_scenery' && prob(getConfig(destroySmallProbKey, 50))) {
                                     var ssrArgs = {
                                         x: tile.x * 32,
                                         y: tile.y * 32,
@@ -234,7 +247,7 @@ var decadeAgeTiles = function () {
                                         if (queryResult.error == 0)
                                             context.executeAction("smallsceneryremove", ssrArgs, function () {});
                                     });
-                                } else if (tallestElement.type == 'large_scenery' && prob(25 * destroyLargeSceneryProbScale)) {
+                                } else if (tallestElement.type == 'large_scenery' && prob(getConfig(destroyLargeProbKey, 25))) {
                                     if (tallestElement.sequence == 0) {
                                         var lsrArgs = {
                                             x: tile.x * 32,
@@ -248,7 +261,7 @@ var decadeAgeTiles = function () {
                                                 context.executeAction("largesceneryremove", lsrArgs, function () {});
                                         });
                                     }
-                                } else if (tallestElement.type == 'wall' && prob(25 * destroyWallsProbScale)) {
+                                } else if (tallestElement.type == 'wall' && prob(getConfig(destroyWallsProbKey, 25))) {
                                     var wrArgs = {
                                         x: tile.x * 32,
                                         y: tile.y * 32,
@@ -259,7 +272,7 @@ var decadeAgeTiles = function () {
                                         if (queryResult.error == 0)
                                             context.executeAction("wallremove", wrArgs, function () {});
                                     });
-                                } else if (tallestElement.type == 'footpath' && prob(5 * destroyPathsProbScale) && (((initialOwnership & 16) != 0) || ((initialOwnership & 32) != 0))) {
+                                } else if (tallestElement.type == 'footpath' && prob(getConfig(destroyPathsProbKey, 5)) && (((initialOwnership & 16) != 0) || ((initialOwnership & 32) != 0))) {
                                     var fprArgs = {
                                         x: tile.x * 32,
                                         y: tile.y * 32,
@@ -271,10 +284,9 @@ var decadeAgeTiles = function () {
                                     });
                                 }
 
+                            } else {
+                                break;
                             }
-                            /* else {
-                            break;
-                            } */
                         } else {
                             break;
                         }
@@ -284,7 +296,7 @@ var decadeAgeTiles = function () {
                 }
             }
 
-            if (!landOwnedOnly) {
+            if (!getConfig(landOwnedOnlyKey, true)) {
                 for (var i = 0; i < tile.numElements; i++) {
                     var element = tile.getElement(i);
                     if (element.type == 'surface') {
@@ -304,7 +316,9 @@ var hardCloseAllRides = function () {
     while (ridesFound < map.numRides) {
         if (currentRide = map.getRide(ride)) {
             //console.log(currentRide.name);
-            currentRide.lifecycleFlags &= ~(1 << 7);
+            if (getConfig(breakFlatsKey, true)) {
+                currentRide.lifecycleFlags &= ~(1 << 7);
+            }
             var rideargs = {
                 ride: currentRide.id,
                 status: 0
@@ -324,7 +338,7 @@ var ageAllRides = function () {
     var currentRide;
     while (ridesFound < map.numRides) {
         if (currentRide = map.getRide(ride)) {
-            currentRide.buildDate -= 120;
+            currentRide.buildDate -= getConfig(ageRidesKey, 10) * 12;
             ridesFound++;
         }
         ride++;
@@ -399,26 +413,458 @@ var fadePaint = function () {
     }
 }
 
+var abandonPark = function () {
+    var defaultMoneyMode = park.getFlag("noMoney");
+    park.setFlag("noMoney", true);
+    hardCloseAllRides();
+    fadePaint();
+    removeAllPeeps();
+    getSceneryIndex();
+    for (var iter = 0; iter < getConfig(iterationsKey, 2); iter++) {
+        ageAllRides();
+        decadeAgeTiles();
+    }
+    park.setFlag("noMoney", defaultMoneyMode);
+}
+function roundTo(value, places) {
+    var power = Math.pow(10, places);
+    return Math.round(value * power) / power;
+}
+
+var spinSpinner = function (key, def, amount, round, widget, handle) {
+    var value = roundTo(getConfig(key, def) + amount, round);
+    if (value >= 0) {
+        setConfig(key, value);
+        handle.findWidget(widget).text = String(value);
+    }
+}
+
+const showWindow = function () {
+    const window = ui.getWindow(namespace);
+    if (window) {
+        window.bringToFront();
+        return;
+    }
+    const rH = 20;
+    const spWid = 65;
+    const labWid = 200;
+    const indent = 20;
+    var handle = undefined;
+    handle = ui.openWindow({
+        classification: namespace,
+        width: 280,
+        height: 21 * rH + 4,
+        title: 'Abandon Park',
+        widgets: [{
+                name: 'global_scale',
+                type: 'spinner',
+                x: 5,
+                y: 1 * rH,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(globalScaleKey, 1)) + "x",
+                onDecrement: function () {
+                    spinSpinner(globalScaleKey, 1, -0.1, 1, 'global_scale', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(globalScaleKey, 1, 0.1, 1, 'global_scale', handle);
+                },
+                tooltip: "Increase/Decrease degredation probabilities. Default: 1",
+            }, {
+                type: 'groupbox',
+                x: 2,
+                y: 8 * rH,
+                width: labWid + spWid,
+                height: 5 * rH + 5
+            }, {
+                name: 'ageGrass',
+                type: 'spinner',
+                x: 5,
+                y: 2 * rH,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(ageGrassProbKey, 100)) + '%',
+                onDecrement: function () {
+                    spinSpinner(ageGrassProbKey, 100, -1, 0, 'ageGrass', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(ageGrassProbKey, 100, 1, 0, 'ageGrass', handle);
+                },
+
+            }, {
+                name: 'growShrub',
+                type: 'spinner',
+                x: 5,
+                y: 3 * rH,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(growShrubProbKey, 30)) + '%',
+                onDecrement: function () {
+                    spinSpinner(growShrubProbKey, 30, -1, 0, 'growShrub', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(growShrubProbKey, 30, 1, 0, 'growShrub', handle);
+                },
+
+            }, {
+                name: 'killGrass',
+                type: 'spinner',
+                x: 5,
+                y: 4 * rH,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(killGrassProbKey, 50)) + '%',
+                onDecrement: function () {
+                    spinSpinner(killGrassProbKey, 50, -1, 0, 'killGrass', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(killGrassProbKey, 50, 1, 0, 'killGrass', handle);
+                },
+
+            }, {
+                name: 'breakTrack',
+                type: 'spinner',
+                x: 5,
+                y: 5 * rH,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(breakTrackProbKey, 50)) + '%',
+                onDecrement: function () {
+                    spinSpinner(breakTrackProbKey, 50, -1, 0, 'breakTrack', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(breakTrackProbKey, 50, 1, 0, 'breakTrack', handle);
+                },
+
+            }, {
+                name: 'trashPath',
+                type: 'spinner',
+                x: 5,
+                y: 6 * rH,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(trashPathProbKey, 50)) + '%',
+                onDecrement: function () {
+                    spinSpinner(trashPathProbKey, 50, -1, 0, 'trashPath', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(trashPathProbKey, 50, 1, 0, 'trashPath', handle);
+                },
+
+            }, {
+                name: 'killTrees',
+                type: 'spinner',
+                x: 5,
+                y: 7 * rH,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(killTreeProbKey, 30)) + '%',
+                onDecrement: function () {
+                    spinSpinner(killTreeProbKey, 50, -1, 0, 'killTrees', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(killTreeProbKey, 50, 1, 0, 'killTrees', handle);
+                },
+
+            }, {
+                name: 'destroyStruct',
+                type: 'spinner',
+                x: 5,
+                y: 8 * rH + 5,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(destroyStructProbKey, 90)) + '%',
+                onDecrement: function () {
+                    spinSpinner(destroyStructProbKey, 90, -1, 0, 'destroyStruct', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(destroyStructProbKey, 90, 1, 0, 'destroyStruct', handle);
+                },
+
+            }, {
+                name: 'destroyPaths',
+                type: 'spinner',
+                x: 5 + indent,
+                y: 9 * rH + 5,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(destroyPathsProbKey, 5)) + '%',
+                onDecrement: function () {
+                    spinSpinner(destroyPathsProbKey, 5, -1, 0, 'destroyPaths', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(destroyPathsProbKey, 5, 1, 0, 'destroyPaths', handle);
+                },
+
+            }, {
+                name: 'destroySmall',
+                type: 'spinner',
+                x: 5 + indent,
+                y: 10 * rH + 5,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(destroySmallProbKey, 50)) + '%',
+                onDecrement: function () {
+                    spinSpinner(destroySmallProbKey, 50, -1, 0, 'destroySmall', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(destroySmallProbKey, 50, 1, 0, 'destroySmall', handle);
+                },
+
+            }, {
+                name: 'destroyWalls',
+                type: 'spinner',
+                x: 5 + indent,
+                y: 11 * rH + 5,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(destroyWallsProbKey, 25)) + '%',
+                onDecrement: function () {
+                    spinSpinner(destroyWallsProbKey, 25, -1, 0, 'destroyWalls', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(destroyWallsProbKey, 25, 1, 0, 'destroyWalls', handle);
+                },
+
+            }, {
+                name: 'destroyLarge',
+                type: 'spinner',
+                x: 5 + indent,
+                y: 12 * rH + 5,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(destroyLargeProbKey, 25)) + '%',
+                onDecrement: function () {
+                    spinSpinner(destroyLargeProbKey, 25, -1, 0, 'destroyLarge', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(destroyLargeProbKey, 25, 1, 0, 'destroyLarge', handle);
+                },
+
+            }, {
+                name: 'global_scaleLabel',
+                type: 'label',
+                x: 75,
+                y: 1 * rH,
+                width: labWid,
+                height: rH - 2,
+                text: "globalScale (1" + 'x' + ')'
+            }, {
+                name: 'ageGrassLabel',
+                type: 'label',
+                x: 75,
+                y: 2 * rH,
+                width: labWid,
+                height: rH - 2,
+                text: "ageGrassProb (100" + '%' + ')'
+            }, {
+                name: 'growShrubLabel',
+                type: 'label',
+                x: 75,
+                y: 3 * rH,
+                width: labWid,
+                height: rH - 2,
+                text: "growShrubProb (30" + '%' + ')'
+            }, {
+                name: 'killGrassLabel',
+                type: 'label',
+                x: 75,
+                y: 4 * rH,
+                width: labWid,
+                height: rH - 2,
+                text: "killGrassProb (50" + '%' + ')'
+            }, {
+                name: 'breakTrackLabel',
+                type: 'label',
+                x: 75,
+                y: 5 * rH,
+                width: labWid,
+                height: rH - 2,
+                text: "breakTrackProb (50" + '%' + ')'
+            }, {
+                name: 'trashPathLabel',
+                type: 'label',
+                x: 75,
+                y: 6 * rH,
+                width: labWid,
+                height: rH - 2,
+                text: "trashPathProb (50" + '%' + ')'
+            }, {
+                name: 'killTreesLabel',
+                type: 'label',
+                x: 75,
+                y: 7 * rH,
+                width: labWid,
+                height: rH - 2,
+                text: "killTreesProb (30" + '%' + ')'
+            }, {
+                name: 'destroyStructLabel',
+                type: 'label',
+                x: 75,
+                y: 8 * rH + 5,
+                width: labWid,
+                height: rH - 2,
+                text: "destroyStructProb (90" + '%' + ')'
+            }, {
+                name: 'destroyPathsLabel',
+                type: 'label',
+                x: 75 + indent,
+                y: 9 * rH + 5,
+                width: labWid,
+                height: rH - 2,
+                text: "destroyPathsProb (5" + '%' + ')'
+            }, {
+                name: 'destroySmallLabel',
+                type: 'label',
+                x: 75 + indent,
+                y: 10 * rH + 5,
+                width: labWid,
+                height: rH - 2,
+                text: "destroySmallProb (50" + '%' + ')'
+            }, {
+                name: 'destroyWallsLabel',
+                type: 'label',
+                x: 75 + indent,
+                y: 11 * rH + 5,
+                width: labWid,
+                height: rH - 2,
+                text: "destroyWallsProb (25" + '%' + ')'
+            }, {
+                name: 'destroyLargeLabel',
+                type: 'label',
+                x: 75 + indent,
+                y: 12 * rH + 5,
+                width: labWid,
+                height: rH - 2,
+                text: "destroyLargeProb (25" + '%' + ')'
+            }, {
+                name: 'maxDPT',
+                type: 'spinner',
+                x: 5,
+                y: 14 * rH,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(maxDPTKey, 3)),
+                onDecrement: function () {
+                    spinSpinner(maxDPTKey, 3, -1, 0, 'maxDPT', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(maxDPTKey, 3, 1, 0, 'maxDPT', handle);
+                },
+
+            }, {
+                name: 'iterations',
+                type: 'spinner',
+                x: 5,
+                y: 15 * rH,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(iterationsKey, 2)),
+                onDecrement: function () {
+                    spinSpinner(iterationsKey, 2, -1, 0, 'iterations', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(iterationsKey, 2, 1, 0, 'iterations', handle);
+                },
+
+            }, {
+                name: 'ageRides',
+                type: 'spinner',
+                x: 5,
+                y: 16 * rH,
+                width: spWid,
+                height: rH - 2,
+                text: String(getConfig(ageRidesKey, 10)) + " yrs",
+                onDecrement: function () {
+                    spinSpinner(ageRidesKey, 10, -1, 0, 'ageRides', handle);
+                },
+                onIncrement: function () {
+                    spinSpinner(ageRidesKey, 10, 1, 0, 'ageRides', handle);
+                },
+
+            }, {
+                name: 'maxDPTLabel',
+                type: 'label',
+                x: 75,
+                y: 14 * rH,
+                width: labWid,
+                height: rH - 2,
+                text: "max scenery/path removal per tile (3)"
+            }, {
+                name: 'iterationsLabel',
+                type: 'label',
+                x: 75,
+                y: 15 * rH,
+                width: labWid,
+                height: rH - 2,
+                text: "Iterations to run (2)"
+            }, {
+                name: 'ageRidesLabel',
+                type: 'label',
+                x: 75,
+                y: 16 * rH,
+                width: labWid,
+                height: rH - 2,
+                text: "How old to age Rides (10)"
+            }, {
+                type: 'checkbox',
+                x: 5,
+                y: 17 * rH,
+                width: 100,
+                height: rH - 2,
+                text: "Only effect owned land",
+                isChecked: getConfig(landOwnedOnlyKey, true),
+                onChange: function (params) {
+                    setConfig(landOwnedOnlyKey, params)
+                }
+            }, {
+                type: 'checkbox',
+                x: 5,
+                y: 18 * rH,
+                width: 100,
+                height: rH - 2,
+                text: "Breakdown Flat Rides",
+                isChecked: getConfig(breakFlatsKey, true),
+                onChange: function (params) {
+                    setConfig(breakFlatsKey, params)
+                }
+            }, {
+                type: 'checkbox',
+                x: 5,
+                y: 19 * rH,
+                width: 100,
+                height: rH - 2,
+                text: "Age Scenery",
+                isChecked: getConfig(ageSceneryKey, true),
+                onChange: function (params) {
+                    setConfig(ageSceneryKey, params)
+                }
+            }, {
+                type: 'button',
+                x: 5,
+                y: 20 * rH,
+                width: 230,
+                height: rH - 2,
+                text: "Abandon Park",
+                tooltip: "Abandon Park!",
+                isPressed: false,
+                onClick: abandonPark,
+            }
+        ],
+    });
+}
+
 var main = function () {
     // Add a menu item under the map icon on the top toolbar
     ui.registerMenuItem("Abandon Park", function () {
-        var defaultMoneyMode = park.getFlag("noMoney");
-        park.setFlag("noMoney", true);
-        hardCloseAllRides();
-        fadePaint();
-        removeAllPeeps();
-        getSceneryIndex();
-        for (var iter = 0; iter < iterations; iter++) {
-            ageAllRides();
-            decadeAgeTiles();
-        }
-        park.setFlag("noMoney", defaultMoneyMode);
+        showWindow();
+
     });
 };
 
 registerPlugin({
     name: 'Abandon Park',
-    version: '1.0',
+    version: '1.0.4',
     authors: ['WantDiscussion'],
     type: 'remote',
     licence: 'GPL-3.0',
